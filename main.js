@@ -1,83 +1,119 @@
 // set the dimensions and margins of the graph
-var margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+var margin = {top: 30, right: 30, bottom: 30, left: 30},
+  width = 450 - margin.left - margin.right,
+  height = 450 - margin.top - margin.bottom;
 
 var parseTime = d3.timeParse("%Y-%m-%d");
+var formatTime = d3.timeFormat("%Y-%m-%d");
+
+// get last week's dates
+var today = new Date();
+var last_week_dates = [];
+var last_week_dates_formatted = [];
+var first = today.getDate() - today.getDay();
+
+for (var i = 0; i <= 6; i++) {
+	var last = first + i;
+	var previous_day = new Date(today.setDate(last));
+	last_week_dates.push(previous_day);
+	last_week_dates_formatted.push(formatTime(previous_day));
+}
 
 // set the ranges
-var x = d3.scaleTime().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
+var x = d3.scaleBand().range([ 0, width ]).padding(0.01);
+var y = d3.scaleBand().range([height, 0]).padding(0.01);
 
-var valueline = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.frequecy); });
+var colorScale = d3.scaleLinear().range(["white", "#69b3a2"]).domain([-8,8])
 
 var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
 
 // read the data from contribution.json
 d3.json('contribution.json',
-    function(error, dataset) {
-        if(error) {
-        console.error('Error while loading contribution.json dataset.');
-        console.error(error);
-        return;
+  function(error, dataset) {
+    if (error) {
+      console.error('Error while loading contribution.json dataset.');
+      console.error(error);
+      return;
     }
-    var usernames = Object.keys(dataset)
-    usernames.forEach(function(d){
-        //drawGraph(dataset, d);
-    });
-    drawGraph(dataset, "jwzhang1");
 
-});
+    //get the max/min number through the dataset for domains
+    var maxValuesFeqSet = [];
+    var minValuesFeqSet = [];
+
+
+    for (var username in dataset) {
+      maxValuesFeqSet.push(d3.max(Object.values(dataset[username])));
+      minValuesFeqSet.push(d3.min(Object.values(dataset[username])));
+    }
+
+    var maxValue = d3.max(maxValuesFeqSet);
+    var minValue = d3.max(minValuesFeqSet);
+
+    x.domain(last_week_dates_formatted);
+    y.domain(Object.keys(dataset));
+
+    // loop each users and draw graph
+    var usernames = Object.keys(dataset)
+    usernames.forEach(function(d) {
+      drawGraph(dataset, d);
+    });
+    drawAxis();
+  });
 
 // draw graph for each user
 function drawGraph(data, username) {
-    var userData = data[username];
-    var date = Object.keys(userData);
-    var frequecies = Object.values(userData);
+  var userData = data[username];
+  var date = Object.keys(userData);
+  var frequecies = Object.values(userData);
 
-    // sort the date in ascending order
-    date.sort(function compare(a, b) {
-        var dateA = new Date(a);
-        var dateB = new Date(b);
-        return dateA - dateB;
-    });
+  // sort the date in ascending order
+  date.sort(function compare(a, b) {
+    var dateA = new Date(a);
+    var dateB = new Date(b);
+    return dateA - dateB;
+  });
 
-    var newData = [];
-    for (var i = 0; i < date.length; i++) {
-        var element = {};
-        element.date = parseTime(date[i]);
-        element.frequecy = userData[date[i]];
-        newData.push(element);
-    }
-    console.log(newData);
 
-    x.domain(d3.extent(newData, function(d) { return d.date; }));
-    y.domain([0, d3.max(newData, function(d) { return d.frequecy; })]);
+  var newData = [];
+  for (var i = 0; i < last_week_dates.length; i++) {
+  	var tmp_object = {};
+  	var tmp_date = formatTime(last_week_dates[i]);
 
-    svg.append("path")
-        .data([newData])
-        .attr("class", "line")
-        .attr("d", valueline);
+  	tmp_object["date"] = tmp_date;
 
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")));
+  	var index = date.indexOf(tmp_date);
 
-    svg.append("g")
-      .call(d3.axisLeft(y));
+  	if (index != -1) {
+  		tmp_object["frequecy"] = userData[date[i]];
+  	} else {
+  		tmp_object["frequecy"] = 0;
+  	}
 
-    svg.selectAll(".dot")
+  	newData.push(tmp_object);
+  }
+
+  svg.selectAll()
       .data(newData)
-      .enter().append("circle") // Uses the enter().append() method
-      .attr("class", "dot") // Assign a class for styling
-      .attr("cx", function(d) { return x(d.date) })
-      .attr("cy", function(d) { return y(d.frequecy) })
-      .attr("r", 5);
+      .enter()
+      .append("rect")
+      .attr("x", function(d) { return x(d.date) })
+      .attr("y", function(d) { return y(username) })
+      .attr("width", x.bandwidth() )
+      .attr("height", y.bandwidth() )
+      .style("fill", function(d) { return colorScale(d.frequecy)} )
+  
+}
+
+function drawAxis() {
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+  svg.append("g")
+    .call(d3.axisLeft(y));
 }
