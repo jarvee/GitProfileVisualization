@@ -17,15 +17,14 @@
 	<div class="select-box" style="float: left;">
 		<h3>Filter Date</h3>
             <form>
-                Date from
-                <input type="search" id="fromDate" style="margin-top: 10px; width: 70px; height: 25px" placeholder="Input"> to
-                <input type="search" id="toDate" style="margin-top: 10px; width: 70px; height: 25px" placeholder="Input">
+                Select a beginning dates
+                <input type="search" id="fromDate" style="margin-top: 10px; width: 70px; height: 25px" placeholder="Input">
                 <div>
-                    <button style="margin-top: 10px; width: 120px" type="button" , id="filter">Double Click</button>
+                    <button style="margin-top: 10px; width: 120px" type="button", id="filter">Double Click</button>
                 </div>
             </form>
 	</div>
-	<div id="price" style="margin-top:130px; margin-left: 920px; width: 900px; height: 50px;">
+	<div id="price" style="margin-top:180px; margin-left: 50px; width: 900px; height: 50px;">
             <h3>Select Users</h3>
             <form>
                 <input type="radio" name="choice" value="Current" onclick="updateYear()"> Current
@@ -33,12 +32,13 @@
                 <input type="radio" name="choice" value="3" onclick="updateYear()"> 3 yrs
                 <input type="radio" name="choice" value="5" onclick="updateYear()"> 5 yrs
             </form>
-        </div>
-        <div id="barchart" style="margin-top: 70px; margin-left: 920px; width: 900px; height: 300px;">
-            <h3>Prediction</h3>
-        </div>
+    </div>
+    <div id="barchart" style="margin-top: 50px; margin-left: 50px; width: 900px; height: 300px;">
+        <h3>Prediction</h3>
+     </div>
 </body>
 <!-- load the d3.js library -->    	
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="main.js"></script>
 </html>
