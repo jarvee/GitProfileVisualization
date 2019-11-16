@@ -1,13 +1,14 @@
 // set the dimensions and margins of the graph
-var margin = {top: 30, right: 30, bottom: 30, left: 30},
-  width = 450 - margin.left - margin.right,
-  height = 450 - margin.top - margin.bottom;
+var margin = {top: 60, right: 60, bottom: 60, left: 60},
+  width = 600 - margin.left - margin.right,
+  height = 600 - margin.top - margin.bottom;
 
 var parseTime = d3.timeParse("%Y-%m-%d");
 var formatTime = d3.timeFormat("%Y-%m-%d");
 
 // get last week's dates
-var today = new Date();
+var today = new Date('2019-11-11');
+console.log(today)
 var last_week_dates = [];
 var last_week_dates_formatted = [];
 var first = today.getDate() - today.getDay();
@@ -15,9 +16,12 @@ var first = today.getDate() - today.getDay();
 for (var i = 0; i <= 6; i++) {
 	var last = first + i;
 	var previous_day = new Date(today.setDate(last));
+  console.log(previous_day)
 	last_week_dates.push(previous_day);
 	last_week_dates_formatted.push(formatTime(previous_day));
 }
+
+console.log(last_week_dates)
 
 // set the ranges
 var x = d3.scaleBand().range([ 0, width ]).padding(0.01);
@@ -25,7 +29,7 @@ var y = d3.scaleBand().range([height, 0]).padding(0.01);
 
 var colorScale = d3.scaleLinear().range(["white", "#69b3a2"]).domain([-8,8])
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#contribution-heatmap").append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
